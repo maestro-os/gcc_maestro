@@ -1,3 +1,10 @@
 *.tar*
+
 binutils/
 gcc/
+musl/
+
+sysroot/
+
+binutils-build/
+gcc-build/
