@@ -6,5 +6,5 @@ wget -O gcc.tar.xz http://ftp.gnu.org/gnu/gcc/gcc-11.2.0/gcc-11.2.0.tar.xz
 tar xvf binutils.tar.xz
 tar xvf gcc.tar.xz
 
-mv binutils-2.36 binutils
-mv gcc-10.2.0 gcc
+mv binutils-2.37 binutils
+mv gcc-11.2.0 gcc
