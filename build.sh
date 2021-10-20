@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export TARGET=i686-maestro
-export PREFIX='/usr'
+export PREFIX="$SYSROOT/usr"
 
 # Preparing fake system
 mkdir -p sysroot/usr/include/
@@ -9,27 +9,27 @@ cp -r musl/include/* sysroot/usr/include/
 
 # Building binutils
 mkdir binutils-build
-pushd binutils-build
+cd binutils-build
 ../binutils/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="sysroot/" --disable-werror
 make
 make install
-popd
+cd ..
 
 mkdir gcc-build
-pushd gcc-build
+cd gcc-build
 ../gcc/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="sysroot/" --enable-languages=c,c++
 make all-gcc all-target-libgcc
 make install-gcc install-target-libgcc
-popd
+cd ..
 
 # TODO
 
-#pushd musl
+#cd musl
 #make
 #make install
-#popd
+#cd ..
 
-#pushd gcc-build
+#cd gcc-build
 #make all-target-libstdc++-v3
 #make install-target-libstdc++-v3
-#popd
+#cd ..

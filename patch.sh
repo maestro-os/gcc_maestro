@@ -18,10 +18,10 @@ eelf_i386_maestro.c: $(srcdir)/emulparams/elf_i386_maestro.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
        ${GENSCRIPTS} elf_i386_maestro "$(tdir_elf_i386_maestro)"' >>binutils/ld/Makefile.am
 
-pushd binutils/ld/
+cd binutils/ld/
 autoreconf
 automake
-popd
+cd ../..
 
 # Patching gcc
 
