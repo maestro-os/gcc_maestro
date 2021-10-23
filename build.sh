@@ -1,34 +1,36 @@
 #!/bin/sh
 
 export TARGET=i686-maestro
-export PREFIX="$SYSROOT/usr"
+export SYSROOT="$(pwd)/sysroot"
 
 # Preparing fake system
-mkdir -p sysroot/usr/include/
-cp -r musl/include/* sysroot/usr/include/
+mkdir -p $SYSROOT/usr/include/
+cp -r musl/include/* $SYSROOT/usr/include/
 
-# Building binutils
-mkdir binutils-build
-cd binutils-build
-../binutils/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="sysroot/" --disable-werror
+# Building musl
+cd musl
+./configure --sysroot="$SYSROOT" --prefix="$SYSROOT/usr" --syslibdir="$SYSROOT/lib"
 make
 make install
 cd ..
 
+# Building binutils
+mkdir binutils-build
+cd binutils-build
+../binutils/configure --target="$TARGET" --prefix="$SYSROOT/usr" --with-sysroot="$SYSROOT" --disable-werror
+make
+make install
+cd ..
+
+# Building gcc
 mkdir gcc-build
 cd gcc-build
-../gcc/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="sysroot/" --enable-languages=c,c++
+../gcc/configure --target="$TARGET" --prefix="$SYSROOT/usr" --with-sysroot="$SYSROOT" --enable-languages=c,c++
 make all-gcc all-target-libgcc
 make install-gcc install-target-libgcc
 cd ..
 
-# TODO
-
-#cd musl
-#make
-#make install
-#cd ..
-
+# Building libstdc++
 #cd gcc-build
 #make all-target-libstdc++-v3
 #make install-target-libstdc++-v3
