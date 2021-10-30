@@ -3,17 +3,19 @@
 # Patching binutils
 
 sed -i 's/^	gnu\* |/	gnu* | maestro* |/' binutils/config.sub
-sed -i '/^  i\[3-7\]86-\*-solaris2\*)/i \ \ i[3-7]86-*-maestro*)\n    targ_defvec=i386_elf32_vec\n    targ_selvecs=\n    targ64_selvecs=x86_64_elf64_vec\n    ;;' binutils/bfd/config.bfd
+#sed -i '/^  i\[3-7\]86-\*-solaris2\*)/i \ \ i[3-7]86-*-maestro*)\n    targ_defvec=i386_elf32_vec\n    targ_selvecs=\n    targ64_selvecs=x86_64_elf64_vec\n    ;;' binutils/bfd/config.bfd
+sed -i '/^  i\[3-7\]86-\*-solaris2\*)/i \ \ i[3-7]86-*-maestro*)\n    targ_defvec=i386_elf32_vec\n    targ_selvecs=\n    ;;' binutils/bfd/config.bfd
 sed -i '/^  i386-\*-elf\*)/a \ \ i386-*-maestro*)			fmt=elf em=gnu ;;' binutils/gas/configure.tgt
-sed -i '/^i\[3-7\]86-\*-solaris2\*)/i i[3-7]86-*-maestro*)\n			targ_emul=elf_i386_maestro\n			targ_extra_emuls=elf_i386\n			targ64_extra_emuls="elf_x86_64_maestro elf_x86_64"\n			;;' binutils/ld/configure.tgt
+#sed -i '/^i\[3-7\]86-\*-solaris2\*)/i i[3-7]86-*-maestro*)\n			targ_emul=elf_i386_maestro\n			targ_extra_emuls=elf_i386\n			targ64_extra_emuls="elf_x86_64_maestro elf_x86_64"\n			;;' binutils/ld/configure.tgt
+sed -i '/^i\[3-7\]86-\*-solaris2\*)/i i[3-7]86-*-maestro*)\n			targ_emul=elf_i386_maestro\n			targ_extra_emuls=elf_i386\n			;;' binutils/ld/configure.tgt
 
 echo '. ${srcdir}/emulparams/elf_i386.sh
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_i386_maestro.sh
 
-echo '. ${srcdir}/emulparams/elf_x86_64.sh
-GENERATE_SHLIB_SCRIPT=yes
-GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_x86_64_maestro.sh
+#echo '. ${srcdir}/emulparams/elf_x86_64.sh
+#GENERATE_SHLIB_SCRIPT=yes
+#GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_x86_64_maestro.sh
 
 sed -i '/^	eelf_i386_ldso/a \	eelf_i386_maestro.c \\' binutils/ld/Makefile.am
 sed -i '/^@AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_ldso.Pc@am__quote@/a @AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_maestro.Pc@am__quote@' binutils/ld/Makefile.am
@@ -24,7 +26,7 @@ sed -i '/^@AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_ldso.Pc@
 #		${GENSCRIPTS} elf_i386_maestro "$(tdir_elf_i386_maestro)"' >>binutils/ld/Makefile.am
 
 cd binutils/ld/
-autoreconf
+aclocal
 automake
 cd ../..
 
@@ -54,8 +56,13 @@ echo '#undef TARGET_MAESTRO
     builtin_assert ("system=maestro");   \
     builtin_assert ("system=unix");   \
     builtin_assert ("system=posix");   \
-  } while(0);' >gcc/gcc/config/maestro.h
+  } while(0);' >gcc/config/maestro.h
 
 sed -i '/^  \*-mingw32\*)/i \ \ \*-maestro\*)\n    GLIBCXX_CHECK_COMPILER_FEATURES\n    GLIBCXX_CHECK_LINKER_FEATURES\n    GLIBCXX_CHECK_MATH_SUPPORT\n    GLIBCXX_CHECK_STDLIB_SUPPORT\n    ;;' gcc/libstdc++-v3/crossconfig.m4
+
+cd gcc/libstdc++-v3/
+autoconf
+cd ../..
+
 sed -i '/^i\[34567\]86-\*-netbsdelf\*)/i i[34567]86-*-maestro*)\n    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"\n    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"\n    ;;' gcc/libgcc/config.host
 sed -i '/^case \$machine in/a \ \ \ \ \*-maestro\* | \\' gcc/fixincludes/mkfixinc.sh

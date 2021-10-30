@@ -4,8 +4,8 @@ export TARGET=i686-maestro
 export SYSROOT="$(pwd)/sysroot"
 
 # Preparing fake system
-mkdir -p $SYSROOT/usr/include/
-cp -r musl/include/* $SYSROOT/usr/include/
+#mkdir -p $SYSROOT/usr/include/
+#cp -r musl/include/* $SYSROOT/usr/include/
 
 # Building musl
 cd musl
@@ -25,7 +25,7 @@ cd ..
 # Building gcc
 mkdir gcc-build
 cd gcc-build
-../gcc/configure --target="$TARGET" --prefix="$SYSROOT/usr" --with-sysroot="$SYSROOT" --enable-languages=c,c++
+../gcc/configure --target="$TARGET" --prefix="$SYSROOT/usr" --with-sysroot="$SYSROOT" --enable-languages=c,c++ --enable-shared
 make all-gcc all-target-libgcc
 make install-gcc install-target-libgcc
 cd ..
