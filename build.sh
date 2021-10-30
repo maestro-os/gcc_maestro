@@ -4,15 +4,7 @@ export TARGET=i686-maestro
 export SYSROOT="$(pwd)/sysroot"
 
 # Preparing fake system
-#mkdir -p $SYSROOT/usr/include/
-#cp -r musl/include/* $SYSROOT/usr/include/
-
-# Building musl
-cd musl
-./configure --sysroot="$SYSROOT" --prefix="$SYSROOT/usr" --syslibdir="$SYSROOT/lib"
-make
-make install
-cd ..
+mkdir -p $SYSROOT/usr/include/
 
 # Building binutils
 mkdir binutils-build
@@ -26,8 +18,20 @@ cd ..
 mkdir gcc-build
 cd gcc-build
 ../gcc/configure --target="$TARGET" --prefix="$SYSROOT/usr" --with-sysroot="$SYSROOT" --enable-languages=c,c++ --enable-shared
-make all-gcc all-target-libgcc
-make install-gcc install-target-libgcc
+make all-gcc
+make all-target-libgcc
+make install-gcc
+make install-target-libgcc
+cd ..
+
+# Building musl
+cd musl
+export PATH="$PATH:$SYSROOT/usr/bin"
+./configure --target="$TARGET" --prefix="$SYSROOT/usr" --syslibdir="$SYSROOT/lib"
+cp -r include/* $SYSROOT/usr/include/
+cp -r arch/i386/* $SYSROOT/usr/include/ # TODO Adapt to other arch
+make
+make install
 cd ..
 
 # Building libstdc++

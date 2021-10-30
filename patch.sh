@@ -43,7 +43,7 @@ echo '#undef TARGET_MAESTRO
 #define LIB_SPEC "-lc"
  
 #undef STARTFILE_SPEC
-#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
+#define STARTFILE_SPEC "crt1.o%s crti.o%s crtbegin.o%s"
  
 #undef ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
@@ -56,7 +56,7 @@ echo '#undef TARGET_MAESTRO
     builtin_assert ("system=maestro");   \
     builtin_assert ("system=unix");   \
     builtin_assert ("system=posix");   \
-  } while(0);' >gcc/config/maestro.h
+  } while(0);' >gcc/gcc/config/maestro.h
 
 sed -i '/^  \*-mingw32\*)/i \ \ \*-maestro\*)\n    GLIBCXX_CHECK_COMPILER_FEATURES\n    GLIBCXX_CHECK_LINKER_FEATURES\n    GLIBCXX_CHECK_MATH_SUPPORT\n    GLIBCXX_CHECK_STDLIB_SUPPORT\n    ;;' gcc/libstdc++-v3/crossconfig.m4
 
