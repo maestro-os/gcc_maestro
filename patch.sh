@@ -16,11 +16,12 @@ GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_x86_64_maestro.sh
 
 sed -i '/^	eelf_i386_ldso/a \	eelf_i386_maestro.c \\' binutils/ld/Makefile.am
+sed -i '/^@AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_ldso.Pc@am__quote@/a @AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_maestro.Pc@am__quote@' binutils/ld/Makefile.am
 
-echo '
-eelf_i386_maestro.c: $(srcdir)/emulparams/elf_i386_maestro.sh \
-	$(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-		${GENSCRIPTS} elf_i386_maestro "$(tdir_elf_i386_maestro)"' >>binutils/ld/Makefile.am
+#echo '
+#eelf_i386_maestro.c: $(srcdir)/emulparams/elf_i386_maestro.sh \
+#	$(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+#		${GENSCRIPTS} elf_i386_maestro "$(tdir_elf_i386_maestro)"' >>binutils/ld/Makefile.am
 
 cd binutils/ld/
 autoreconf
