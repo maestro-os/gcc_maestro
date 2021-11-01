@@ -7,4 +7,7 @@ musl/
 sysroot/
 
 binutils-build/
+binutils-build2/
 gcc-build/
+gcc-build2/
+libstdcpp-build/
