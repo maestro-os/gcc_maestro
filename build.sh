@@ -1,10 +1,19 @@
 #!/bin/sh
 
-export TARGET=i686-maestro
-export SYSROOT="$(pwd)/sysroot"
+# Exit on fail
+set -e
 
-# Preparing fake system
-mkdir -p $SYSROOT/usr/include/
+export HOST=$(gcc -dumpmachine)
+export TARGET=i686-maestro
+export SYSROOT="$(pwd)/toolchain"
+
+# The numbers of jobs to run simultaneously
+export JOBS=4
+
+mkdir -p $SYSROOT/tools
+mkdir -p $SYSROOT/usr/include
+
+export PATH="$PATH:$SYSROOT/tools/bin"
 
 
 
@@ -13,38 +22,62 @@ mkdir -p $SYSROOT/usr/include/
 # ------------------------------
 
 # Building binutils
-mkdir binutils-build
-cd binutils-build
-../binutils/configure --target="$TARGET" --prefix="$SYSROOT/tools" --with-sysroot="$SYSROOT" --disable-nls --disable-werror
-make
-make install -j1
-cd ..
+#mkdir -p binutils-build
+#cd binutils-build
+#../binutils/configure \
+#	--prefix="$SYSROOT/tools" \
+#	--target="$TARGET" \
+#	--with-sysroot="$SYSROOT/tools" \
+#	--disable-nls \
+#	--disable-multilib \
+#	--disable-werror \
+#	--enable-deterministic-archives \
+#	--disable-compressed-debug-sections
+#make configure-host -j${JOBS}
+#make -j${JOBS}
+#make install -j1
+#cd ..
 
 # Building gcc
-mkdir gcc-build
-cd gcc-build
-../gcc/configure --target="$TARGET" --prefix="$SYSROOT/tools" --with-sysroot="$SYSROOT" --enable-languages=c,c++ --with-newlib --without-headers --disable-shared --disable-nls --disable-multilib
-make all-gcc
-make install-gcc
-make all-target-libgcc
-make install-target-libgcc
-cd ..
+#mkdir -p gcc-build
+#cd gcc-build
+#../gcc/configure \
+#	--prefix="$SYSROOT/tools" \
+#	--build="$HOST" \
+#	--host="$HOST" \
+#	--target="$TARGET" \
+#	--with-sysroot="$SYSROOT/tools" \
+#	--disable-nls \
+#	--with-newlib \
+#	--disable-libitm \
+#	--disable-libvtv \
+#	--disable-libssp \
+#	--disable-shared \
+#	--disable-libgomp \
+#	--without-headers \
+#	--disable-threads \
+#	--disable-multilib \
+#	--disable-libatomic \
+#	--disable-libstdcxx \
+#	--enable-languages=c \
+#	--disable-libquadmath \
+#	--disable-libsanitizer \
+#	--disable-decimal-float \
+#	--enable-clocale=generic
+#make all-gcc -j${JOBS}
+#make all-target-libgcc -j${JOBS}
+#make install-gcc
+#make install-target-libgcc
+#cd ..
 
-# Building musl
+# Building Musl
 cd musl
-export PATH="$PATH:$SYSROOT/tools/bin"
-./configure --target="$TARGET" --prefix="$SYSROOT/usr" --syslibdir="$SYSROOT/tools/lib"
-cp -r include/* $SYSROOT/usr/include/
-make
-make install
-cd ..
-
-# Building libstdc++
-mkdir libstdcpp-build
-cd libstdcpp-build
-../gcc/libstdc++-v3/configure --host="$TARGET" --build="$(gcc -dumpmachine)" --prefix="/usr" --disable-multilib --disable-nls --disable-libstdcxx-pch --with-gxx-include-dir="/tools/$TARGET/include/c++/11.2.0"
-make all-target-libstdc++-v3
-make install-target-libstdc++-v3
+./configure \
+	CROSS_COMPILE=${TARGET}- \
+	--prefix=/usr \
+	--target=$TARGET
+make -j${JOBS}
+make DESTDIR=$SYSROOT install
 cd ..
 
 
@@ -53,21 +86,29 @@ cd ..
 #    Stage 2
 # ------------------------------
 
-# Building binutils
-mkdir binutils-build2
-cd binutils-build2
-../binutils/configure --host="$TARGET" --build="$(gcc -dumpmachine)" --prefix="$SYSROOT/tools" --disable-nls --enable-shared --disable-werror --enable-64-bit-bfd
-make
-make DESTDIR=$SYSROOT install -j1
-install -vm755 libctf/.libs/libctf.so.0.0.0 $SYSROOT/usr/lib
+mkdir -p gcc-build2
+export CFLAGS="-I/usr/include"
+cd gcc-build2
+../gcc/configure \
+	--prefix="$SYSROOT/usr" \
+	--build="$HOST" \
+	--host="$HOST" \
+	--target="$TARGET" \
+	--with-sysroot="$SYSROOT" \
+	--disable-multilib \
+	--disable-nls \
+	--enable-shared \
+	--enable-languages=c,c++ \
+	--enable-threads=posix \
+	--enable-clocale=generic \
+	--enable-libstdcxx-time \
+	--enable-fully-dynamic-string \
+	--disable-symvers \
+	--disable-libsanitizer \
+	--disable-lto-plugin \
+	--disable-libssp
+make -j${JOBS}
+make install
 cd ..
 
-# Building gcc
-mkdir gcc-build2
-cd gcc-build2
-../gcc/configure --build="$(gcc -dumpmachine)" --host="$TARGET" --prefix="/usr" CC_FOR_TARGET="${TARGET}-gcc" --with-build-sysroot="$SYSROOT" --enable-initfini-array --enable-languages=c,c++
-make all-gcc
-make DESTDIR=$SYSROOT install-gcc
-make all-target-libgcc
-make DESTDIR=$SYSROOT install-target-libgcc
-cd ..
+# TODO Build libstdc++?

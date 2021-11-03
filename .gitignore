@@ -4,7 +4,7 @@ binutils/
 gcc/
 musl/
 
-sysroot/
+toolchain/
 
 binutils-build/
 binutils-build2/
