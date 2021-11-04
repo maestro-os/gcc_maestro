@@ -4,7 +4,7 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-export TARGET=i686-maestro
+export TARGET=i686-unknown-maestro
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
@@ -21,7 +21,7 @@ export PATH="$PATH:$SYSROOT/tools/bin"
 #    Stage 1
 # ------------------------------
 
-# Building binutils
+## Building binutils
 #mkdir -p binutils-build
 #cd binutils-build
 #../binutils/configure \
@@ -37,8 +37,8 @@ export PATH="$PATH:$SYSROOT/tools/bin"
 #make -j${JOBS}
 #make install -j1
 #cd ..
-
-# Building gcc
+#
+## Building gcc
 #mkdir -p gcc-build
 #cd gcc-build
 #../gcc/configure \
@@ -69,16 +69,16 @@ export PATH="$PATH:$SYSROOT/tools/bin"
 #make install-gcc
 #make install-target-libgcc
 #cd ..
-
-# Building Musl
-cd musl
-./configure \
-	CROSS_COMPILE=${TARGET}- \
-	--prefix=/usr \
-	--target=$TARGET
-make -j${JOBS}
-make DESTDIR=$SYSROOT install
-cd ..
+#
+## Building Musl
+#cd musl
+#./configure \
+#	CROSS_COMPILE=${TARGET}- \
+#	--prefix=/ \
+#	--target=$TARGET
+#make -j${JOBS}
+#make DESTDIR=$SYSROOT install
+#cd ..
 
 
 
@@ -87,10 +87,9 @@ cd ..
 # ------------------------------
 
 mkdir -p gcc-build2
-export CFLAGS="-I/usr/include"
 cd gcc-build2
 ../gcc/configure \
-	--prefix="$SYSROOT/usr" \
+	--prefix="$SYSROOT" \
 	--build="$HOST" \
 	--host="$HOST" \
 	--target="$TARGET" \
@@ -107,7 +106,7 @@ cd gcc-build2
 	--disable-libsanitizer \
 	--disable-lto-plugin \
 	--disable-libssp
-make -j${JOBS}
+make AS_FOR_TARGET="${TARGET}-as" LD_FOR_TARGET="${TARGET}-ld" -j${JOBS}
 make install
 cd ..
 
