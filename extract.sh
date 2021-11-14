@@ -1,8 +1,8 @@
 #!/bin/sh
 
-tar xvf binutils.tar.xz
-tar xvf gcc.tar.xz
-tar xvf musl.tar.gz
+tar xf binutils.tar.xz
+tar xf gcc.tar.xz
+tar xf musl.tar.gz
 
 mv binutils-2.37 binutils
 mv gcc-11.2.0 gcc
