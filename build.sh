@@ -44,7 +44,7 @@ cd gcc-build
 ../gcc/configure \
 	--prefix="$SYSROOT/tools" \
 	--build="$HOST" \
-	--host="$HOST" \
+	--host="$TARGET" \
 	--target="$TARGET" \
 	--with-sysroot="$SYSROOT" \
 	--disable-nls \
@@ -70,7 +70,7 @@ make install-gcc
 make install-target-libgcc
 cd ..
 
-## Building Musl
+# Building Musl
 #cd musl
 #./configure \
 #	CROSS_COMPILE=${TARGET}- \
@@ -79,13 +79,13 @@ cd ..
 #make -j${JOBS}
 #make DESTDIR=$SYSROOT install
 #cd ..
-#
-#
-#
-## ------------------------------
-##    Stage 2
-## ------------------------------
-#
+
+
+
+# ------------------------------
+#    Stage 2
+# ------------------------------
+
 ## Building binutils
 #mkdir -p binutils-build2
 #cd binutils-build2
@@ -106,7 +106,7 @@ cd ..
 #../gcc/configure \
 #	--prefix="$SYSROOT" \
 #	--build="$HOST" \
-#	--host="$HOST" \
+#	--host="$TARGET" \
 #	--target="$TARGET" \
 #	--with-build-sysroot="$SYSROOT" \
 #	--enable-initfini-array \
