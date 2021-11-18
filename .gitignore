@@ -11,3 +11,5 @@ binutils-build2/
 gcc-build/
 gcc-build2/
 libstdcpp-build/
+
+a.out
