@@ -21,45 +21,45 @@ export PATH="$PATH:$SYSROOT/tools/bin"
 #    Stage 1
 # ------------------------------
 
-## Building binutils
-#mkdir -p binutils-build
-#cd binutils-build
-#../binutils/configure \
-#	--prefix="$SYSROOT/tools" \
-#	--with-sysroot="$SYSROOT" \
-#	--target="$TARGET" \
-#	--disable-nls \
-#	--disable-werror
-#make configure-host -j${JOBS}
-#make -j${JOBS}
-#make install
-#cd ..
-#
-## Building gcc
-#mkdir -p gcc-build
-#cd gcc-build
-#../gcc/configure \
-#	--prefix="$SYSROOT/tools" \
-#	--target="$TARGET" \
-#	--with-sysroot="$SYSROOT" \
-#	--with-newlib \
-#	--without-headers \
-#	--enable-initfini-array \
-#	--disable-nls \
-#	--disable-shared \
-#	--disable-multilib \
-#	--disable-decimal-float \
-#	--disable-threads \
-#	--disable-libatomic \
-#	--disable-libgomp \
-#	--disable-libquadmath \
-#	--disable-libssp \
-#	--disable-libvtv \
-#	--disable-libstdcxx \
-#	--enable-languages=c,c++
-#make
-#make install
-#cd ..
+# Building binutils
+mkdir -p binutils-build
+cd binutils-build
+../binutils/configure \
+	--prefix="$SYSROOT/tools" \
+	--with-sysroot="$SYSROOT" \
+	--target="$TARGET" \
+	--disable-nls \
+	--disable-werror
+make configure-host -j${JOBS}
+make -j${JOBS}
+make install
+cd ..
+
+# Building gcc
+mkdir -p gcc-build
+cd gcc-build
+../gcc/configure \
+	--prefix="$SYSROOT/tools" \
+	--target="$TARGET" \
+	--with-sysroot="$SYSROOT" \
+	--with-newlib \
+	--without-headers \
+	--enable-initfini-array \
+	--disable-nls \
+	--disable-shared \
+	--disable-multilib \
+	--disable-decimal-float \
+	--disable-threads \
+	--disable-libatomic \
+	--disable-libgomp \
+	--disable-libquadmath \
+	--disable-libssp \
+	--disable-libvtv \
+	--disable-libstdcxx \
+	--enable-languages=c,c++
+make
+make install
+cd ..
 
 # Building Musl
 cd musl
