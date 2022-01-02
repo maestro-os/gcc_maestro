@@ -10,6 +10,7 @@ binutils-build/
 binutils-build2/
 gcc-build/
 gcc-build2/
-libstdcpp-build/
+libstdc++-build/
+libstdc++-build2/
 
 a.out

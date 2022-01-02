@@ -4,7 +4,7 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-export TARGET=i386-unknown-maestro
+export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
@@ -60,6 +60,7 @@ cd gcc-build
 make
 make install
 cd ..
+cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $(${TARGET}-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
 
 # Building Musl
 cd musl
@@ -72,52 +73,17 @@ make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
 
-
-
-# ------------------------------
-#    Stage 2
-# ------------------------------
-
-## Building binutils
-#mkdir -p binutils-build2
-#cd binutils-build2
-#../binutils/configure \
-#	--prefix="/usr" \
-#	--build="$HOST" \
-#	--host="$TARGET" \
-#	--disable-nls \
-#	--enable-shared \
-#	--disable-werror \
-#	--enable-64-bit-bfd
-#make -j${JOBS}
-#make DESTDIR=$SYSROOT install -j1
-#cd ..
-#
-#mkdir -p gcc-build2
-#cd gcc-build2
-#../gcc/configure \
-#	--prefix="$SYSROOT" \
-#	--build="$HOST" \
-#	--host="$HOST" \
-#	--target="$TARGET" \
-#	--with-build-sysroot="$SYSROOT" \
-#	--enable-initfini-array \
-#    --disable-nls \
-#    --disable-multilib \
-#    --disable-decimal-float \
-#    --disable-libatomic \
-#    --disable-libgomp \
-#    --disable-libquadmath \
-#    --disable-libssp \
-#    --disable-libvtv \
-#    --disable-libstdcxx \
-#    --enable-languages=c,c++
-##make AS_FOR_TARGET="${TARGET}-as" LD_FOR_TARGET="${TARGET}-ld" -j${JOBS} all-gcc
-##make AS_FOR_TARGET="${TARGET}-as" LD_FOR_TARGET="${TARGET}-ld" -j${JOBS} all-target-libgcc
-##make install-gcc
-##make install-target-libgcc
-#make -j${JOBS}
-#make DESTDIR=$SYSROOT install
-#cd ..
-
-# TODO Build libstdc++?
+# Building libstdc++
+mkdir -p libstdc++-build
+cd libstdc++-build
+../gcc/libstdc++-v3/configure \
+    --host=$TARGET \
+    --build=$(gcc -dumpmachine) \
+    --prefix=/usr \
+    --disable-multilib \
+    --disable-nls \
+    --disable-libstdcxx-pch \
+    --with-gxx-include-dir=/tools/${TARGET}/include/c++/11.2.0
+make -j${JOBS}
+make DESTDIR=$SYSROOT install
+cd ..
