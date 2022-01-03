@@ -4,7 +4,8 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
+# export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
+export TARGET=x86_64-cross-linux-gnu
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously

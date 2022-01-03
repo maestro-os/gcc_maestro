@@ -10,4 +10,7 @@ rm -rf gcc-build2
 
 rm -rf musl
 
+rm -rf libstdc++-build
+rm -rf libstdc++-build2
+
 rm -rf toolchain
