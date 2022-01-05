@@ -5,7 +5,7 @@ set -e
 
 export HOST=$(gcc -dumpmachine)
 # export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
-export TARGET=x86_64-cross-linux-gnu
+export TARGET=x86_64-cross-linux-musl
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
@@ -35,7 +35,7 @@ cd binutils-build
 	--target="$TARGET" \
 	--disable-nls \
 	--disable-werror
-make
+make -j${JOBS}
 make install -j1
 cd ..
 
@@ -45,7 +45,6 @@ cd gcc-build
 ../gcc/configure \
 	--target="$TARGET" \
 	--prefix="$SYSROOT/tools" \
-	--with-glibc-version=2.11 \
 	--with-sysroot="$SYSROOT" \
 	--with-newlib \
 	--without-headers \
@@ -62,22 +61,19 @@ cd gcc-build
 	--disable-libvtv \
 	--disable-libstdcxx \
 	--enable-languages=c,c++
-make
+make -j${JOBS}
 make install
 cd ..
-cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $(${TARGET}-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
 
 # Building Musl
 cd musl
 ./configure \
 	CROSS_COMPILE=${TARGET}- \
 	--target="$TARGET" \
-	--prefix="/usr" \
-	--disable-shared
+	--prefix="/usr"
 make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
-${SYSROOT}/tools/libexec/gcc/${TARGET}/11.2.0/install-tools/mkheaders
 
 # Building libstdc++
 mkdir -p libstdc++-build

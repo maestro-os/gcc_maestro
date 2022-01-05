@@ -55,3 +55,7 @@ cd ../..
 
 sed -i '/^i\[34567\]86-\*-netbsdelf\*)/i i[34567]86-*-maestro*)\n    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"\n    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"\n    ;;' gcc/libgcc/config.host
 sed -i '/^case \$machine in/a \ \ \ \ \*-maestro\* | \\' gcc/fixincludes/mkfixinc.sh
+
+# Patching musl
+
+sed -i 's/_Addr int/_Addr long int/' musl/arch/i386/bits/alltypes.h.in

@@ -3,9 +3,8 @@
 # Exit on fail
 set -e
 
-export HOST=$(gcc -dumpmachine)
-# export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
-export TARGET=x86_64-cross-linux-gnu
+export HOST=x86_64-cross-linux-musl
+export TARGET=i686-unknown-maestro
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
