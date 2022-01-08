@@ -11,6 +11,10 @@ echo '. ${srcdir}/emulparams/elf_i386.sh
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_i386_maestro.sh
 
+echo '. ${srcdir}/emulparams/elf_x86_64.sh
+GENERATE_SHLIB_SCRIPT=yes
+GENERATE_PIE_SCRIPT=yes' >binutils/ld/emulparams/elf_x86_64_maestro.sh
+
 sed -i '/^	eelf_i386_ldso/a \	eelf_i386_maestro.c \\' binutils/ld/Makefile.am
 sed -i '/^@AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_ldso.Pc@am__quote@/a @AMDEP_TRUE@@am__include@ @am__quote@.\/\$(DEPDIR)\/eelf_i386_maestro.Pc@am__quote@' binutils/ld/Makefile.am
 
@@ -36,6 +40,9 @@ echo '#undef TARGET_MAESTRO
  
 #undef ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
+
+#undef LINK_SPEC
+#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{static:-static} %{!shared: %{!static: %{rdynamic:-export-dynamic}}}"
  
 #undef TARGET_OS_CPP_BUILTINS
 #define TARGET_OS_CPP_BUILTINS()      \

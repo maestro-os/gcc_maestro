@@ -4,8 +4,7 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-# export TARGET=$(gcc -dumpmachine | sed 's/-/-cross-/')
-export TARGET=x86_64-cross-linux-musl
+export TARGET=i386-unknown-maestro
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
@@ -33,6 +32,7 @@ cd binutils-build
 	--prefix="$SYSROOT/tools" \
 	--with-sysroot="$SYSROOT" \
 	--target="$TARGET" \
+	--enable-shared \
 	--disable-nls \
 	--disable-werror
 make -j${JOBS}
@@ -50,7 +50,6 @@ cd gcc-build
 	--without-headers \
 	--enable-initfini-array \
 	--disable-nls \
-	--disable-shared \
 	--disable-multilib \
 	--disable-decimal-float \
 	--disable-threads \
@@ -60,6 +59,7 @@ cd gcc-build
 	--disable-libssp \
 	--disable-libvtv \
 	--disable-libstdcxx \
+	--enable-shared \
 	--enable-languages=c,c++
 make -j${JOBS}
 make install
@@ -82,6 +82,7 @@ cd libstdc++-build
     --host="$TARGET" \
     --build="$HOST" \
     --prefix="/usr" \
+    --enable-shared \
     --disable-multilib \
     --disable-nls \
     --disable-libstdcxx-pch \
