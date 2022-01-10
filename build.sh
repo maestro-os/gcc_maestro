@@ -32,7 +32,6 @@ cd binutils-build
 	--prefix="$SYSROOT/tools" \
 	--with-sysroot="$SYSROOT" \
 	--target="$TARGET" \
-	--enable-shared \
 	--disable-nls \
 	--disable-werror
 make -j${JOBS}
@@ -59,21 +58,23 @@ cd gcc-build
 	--disable-libssp \
 	--disable-libvtv \
 	--disable-libstdcxx \
-	--enable-shared \
 	--enable-languages=c,c++
 make -j${JOBS}
 make install
 cd ..
+cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $($TARGET-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
 
 # Building Musl
 cd musl
 ./configure \
 	CROSS_COMPILE=${TARGET}- \
 	--target="$TARGET" \
-	--prefix="/usr"
+	--prefix="/usr" \
+	--disable-shared
 make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
+$SYSROOT/tools/libexec/gcc/$TARGET/11.2.0/install-tools/mkheaders
 
 # Building libstdc++
 mkdir -p libstdc++-build
@@ -82,7 +83,6 @@ cd libstdc++-build
     --host="$TARGET" \
     --build="$HOST" \
     --prefix="/usr" \
-    --enable-shared \
     --disable-multilib \
     --disable-nls \
     --disable-libstdcxx-pch \
