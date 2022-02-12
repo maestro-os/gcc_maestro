@@ -45,13 +45,16 @@ echo '#undef TARGET_MAESTRO
 #define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{static:-static} %{!shared: %{!static: %{rdynamic:-export-dynamic}}}"
  
 #undef TARGET_OS_CPP_BUILTINS
-#define TARGET_OS_CPP_BUILTINS()      \
-  do {                                \
+#define TARGET_OS_CPP_BUILTINS()         \
+  do {                                   \
     builtin_define ("__maestro__");      \
-    builtin_define ("__unix__");      \
+    builtin_define ("__linux__");        \
+    builtin_define ("__linux");          \
+    builtin_define ("__unix__");         \
+    builtin_define ("__unix");           \
     builtin_assert ("system=maestro");   \
-    builtin_assert ("system=unix");   \
-    builtin_assert ("system=posix");   \
+    builtin_assert ("system=unix");      \
+    builtin_assert ("system=posix");     \
   } while(0);' >gcc/gcc/config/maestro.h
 
 sed -i '/^  \*-mingw32\*)/i \ \ \*-maestro\*)\n    GLIBCXX_CHECK_COMPILER_FEATURES\n    GLIBCXX_CHECK_LINKER_FEATURES\n    GLIBCXX_CHECK_MATH_SUPPORT\n    GLIBCXX_CHECK_STDLIB_SUPPORT\n    ;;' gcc/libstdc++-v3/crossconfig.m4
