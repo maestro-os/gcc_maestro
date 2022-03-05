@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit on fail
 set -e
 
 export HOST=$(gcc -dumpmachine)
-export TARGET=i386-unknown-maestro
+#export TARGET=i386-unknown-maestro
+export TARGET=i386-linux-musl
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
@@ -49,6 +50,7 @@ cd gcc-build
 	--without-headers \
 	--enable-initfini-array \
 	--disable-nls \
+	--disable-shared \
 	--disable-multilib \
 	--disable-decimal-float \
 	--disable-threads \
@@ -62,7 +64,7 @@ cd gcc-build
 make -j${JOBS}
 make install
 cd ..
-cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $($TARGET-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
+#cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $($TARGET-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
 
 # Building Musl
 cd musl
@@ -74,7 +76,7 @@ cd musl
 make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
-$SYSROOT/tools/libexec/gcc/$TARGET/11.2.0/install-tools/mkheaders
+#$SYSROOT/tools/libexec/gcc/$TARGET/11.2.0/install-tools/mkheaders
 
 # Building libstdc++
 mkdir -p libstdc++-build
