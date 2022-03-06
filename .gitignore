@@ -1,7 +1,7 @@
 *.tar*
 
 binutils/
-gcc/
+llvm/
 musl/
 
 toolchain/
