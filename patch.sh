@@ -26,7 +26,7 @@ cd ../..
 # Patching gcc
 
 sed -i 's/^	gnu\* |/	gnu* | maestro* |/' gcc/config.sub
-sed -i '/^\*-\*-netbsd\*)/i *-*-maestro*)\n  gas=yes\n  gnu_ld=yes\n  default_use_cxa_atexit=yes\n  use_gcc_stdin=wrap\n  ;;' gcc/gcc/config.gcc
+sed -i '/^\*-\*-netbsd\*)/i *-*-maestro*)\n  gas=yes\n  gnu_ld=yes\n  default_use_cxa_atexit=yes\n  use_gcc_stdin=wrap\n  tm_defines="$tm_defines DEFAULT_LIBC=LIBC_MUSL"\n  ;;' gcc/gcc/config.gcc
 sed -i '/^i\[34567\]86-\*-netbsdelf\*)/i i[34567]86-*-maestro*)\n	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h maestro.h"\n	;;' gcc/gcc/config.gcc
 
 echo '#undef TARGET_MAESTRO

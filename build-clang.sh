@@ -4,7 +4,6 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-#export TARGET=i386-unknown-maestro
 export TARGET=i386-linux-musl
 export SYSROOT="$(pwd)/toolchain"
 
@@ -19,8 +18,6 @@ export CONFIG_SITE=$SYSROOT/usr/share/config.site
 export LC_ALL=POSIX
 set +h
 umask 022
-
-
 
 # ------------------------------
 #    Stage 1
@@ -39,44 +36,17 @@ make -j${JOBS}
 make install -j1
 cd ..
 
-# Building gcc
-mkdir -p gcc-build
-cd gcc-build
-../gcc/configure \
-	--target="$TARGET" \
-	--prefix="$SYSROOT/tools" \
-	--with-sysroot="$SYSROOT" \
-	--with-newlib \
-	--without-headers \
-	--enable-initfini-array \
-	--disable-nls \
-	--disable-shared \
-	--disable-multilib \
-	--disable-decimal-float \
-	--disable-threads \
-	--disable-libatomic \
-	--disable-libgomp \
-	--disable-libquadmath \
-	--disable-libssp \
-	--disable-libvtv \
-	--disable-libstdcxx \
-	--enable-languages=c,c++
-make -j${JOBS}
-make install
-cd ..
-#cat gcc/gcc/limitx.h gcc/gcc/glimits.h gcc/gcc/limity.h >`dirname $($TARGET-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
+export CC=clang
+export CFLAGS="--target=${TARGET}"
 
 # Building Musl
 cd musl
 ./configure \
-	CROSS_COMPILE=${TARGET}- \
 	--target="$TARGET" \
-	--prefix="/usr" \
-	--disable-shared
+	--prefix="/usr"
 make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
-#$SYSROOT/tools/libexec/gcc/$TARGET/11.2.0/install-tools/mkheaders
 
 # Building libstdc++
 mkdir -p libstdc++-build
