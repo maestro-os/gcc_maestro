@@ -26,6 +26,9 @@ umask 022
 #    Stage 1
 # ------------------------------
 
+export CC=clang
+export CXXC=clang++
+
 # Building binutils
 mkdir -p binutils-build
 cd binutils-build
@@ -39,13 +42,17 @@ make -j${JOBS}
 make install -j1
 cd ..
 
+export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
+export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
+
+# TODO Add support for shared libc (need compiler_rt)
 # Building Musl
 cd musl
 ./configure \
 	CROSS_COMPILE=${TARGET}- \
 	--target="$TARGET" \
-	--prefix="/usr"
+	--prefix="/usr" \
+	--disable-shared
 make -j${JOBS}
 make DESTDIR=$SYSROOT install
 cd ..
-#$SYSROOT/tools/libexec/gcc/$TARGET/11.2.0/install-tools/mkheaders
