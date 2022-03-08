@@ -41,15 +41,14 @@ export CXXC=clang++
 #make -j${JOBS}
 #make install -j1
 #cd ..
-#
-#export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
-#export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
-#
-## TODO Add support for shared libc (need compiler_rt)
-## Building Musl
+
+export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
+export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
+
+# TODO Support shared
+# Building Musl
 #cd musl
 #./configure \
-#	CROSS_COMPILE=${TARGET}- \
 #	--target="$TARGET" \
 #	--prefix="/usr" \
 #	--disable-shared
@@ -57,14 +56,36 @@ export CXXC=clang++
 #make DESTDIR=$SYSROOT install
 #cd ..
 
-cd llvm
+# Building compiler-rt
+cd llvm/compiler-rt
 mkdir -p build
-cmake -G Ninja -S runtimes -B build \
-	-DLLVM_ENABLE_PROJECTS="clang" \
-	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-	-DCMAKE_INSTALL_PREFIX=$SYSROOT \
-	-DLLVM_RUNTIME_TARGETS="$TARGET"
-ninja -C build runtimes
-ninja -C build check-runtimes
-ninja -C build install-runtimes
+cd build
+cmake .. \
+	-G Ninja \
+	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -v --rtlib=compiler-rt" \
+	-DCOMPILER_RT_BUILD_BUILTINS=ON \
+	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+	-DCOMPILER_RT_BUILD_MEMPROF=OFF \
+	-DCOMPILER_RT_BUILD_PROFILE=OFF \
+	-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+	-DCOMPILER_RT_BUILD_XRAY=OFF \
+	-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+	-DCMAKE_SYSROOT="$SYSROOT"
+ninja
 cd ..
+
+# Building clang
+#cd llvm
+#mkdir -p build
+#cmake -G Ninja -S llvm -B build \
+#	-DLLVM_ENABLE_PROJECTS="clang" \
+#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+#	-DLLVM_ENABLE_LLD=true \
+#	-DLLVM_RUNTIME_TARGETS="$TARGET" \
+#	-DCMAKE_INSTALL_PREFIX="$SYSROOT"
+#ninja -C build runtimes
+#ninja -C build check-runtimes
+#ninja -C build install-runtimes
+#cd ..

@@ -1,16 +1,11 @@
 *.tar*
 
 binutils/
+binutils-build/
+
 llvm/
 musl/
 
 toolchain/
-
-binutils-build/
-binutils-build2/
-gcc-build/
-gcc-build2/
-libstdc++-build/
-libstdc++-build2/
 
 a.out
