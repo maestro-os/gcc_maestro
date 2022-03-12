@@ -118,11 +118,10 @@ cmake ../llvm/compiler-rt \
 	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
 	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
 	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
-	-DCMAKE_ASM_FLAGS="-fuse-ld=lld -ffreestanding" \
-	-DCMAKE_C_FLAGS="-fuse-ld=lld -ffreestanding -v" \
-	-DCMAKE_CXX_FLAGS="-fuse-ld=lld -ffreestanding -stdlib=libc++ -v" \
+	-DCMAKE_ASM_FLAGS="-fuse-ld=lld" \
+	-DCMAKE_C_FLAGS="-fuse-ld=lld" \
+	-DCMAKE_CXX_FLAGS="-fuse-ld=lld -stdlib=libc++" \
 	-DCMAKE_EXE_LINKER_FLAGS="-v" \
-	-DCOMPILER_RT_USE_LIBCXX=OFF \
 	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 	-DCOMPILER_RT_BUILD_BUILTINS=ON \
 	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
