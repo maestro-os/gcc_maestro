@@ -27,9 +27,9 @@ umask 022
 # ------------------------------
 
 export CC=clang
-export CXXC=clang++
+export CXX=clang++
 
-## Building binutils
+# Building binutils
 #mkdir -p binutils-build
 #cd binutils-build
 #../binutils/configure \
@@ -45,47 +45,95 @@ export CXXC=clang++
 export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 
-# TODO Support shared
 # Building Musl
 #cd musl
 #./configure \
 #	--target="$TARGET" \
-#	--prefix="/usr" \
-#	--disable-shared
+#	--prefix="/usr"
 #make -j${JOBS}
 #make DESTDIR=$SYSROOT install
 #cd ..
 
+unset CFLAGS
+unset CXXFLAGS
+
+# Building libc++
+#cd llvm
+#rm -rf build
+#mkdir -p build
+#cmake \
+#	-G Ninja \
+#	-S runtimes \
+#	-B build \
+#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+#	-DCMAKE_INSTALL_PREFIX="$SYSROOT" \
+#	-DCMAKE_C_COMPILER="/bin/clang" \
+#	-DCMAKE_CXX_COMPILER="/bin/clang++" \
+#	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
+#	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
+#	#-DCMAKE_SYSROOT="$SYSROOT"
+#ninja -C build cxx cxxabi unwind
+#ninja -C build install-cxx install-cxxabi install-unwind
+#cd ..
+
+# Building clang and lld
+#mkdir -p clang-build
+#cd clang-build
+#cmake ../llvm/llvm -G Ninja -DLLVM_ENABLE_PROJECTS="lld;clang" \
+#	-DCMAKE_BUILD_TYPE=Release \
+#	-DLLVM_PARALLEL_COMPILE_JOBS=$JOBS \
+#	-DLLVM_PARALLEL_LINK_JOBS=1 \
+#	-DLLVM_TARGETS_TO_BUILD=X86 \
+#	-DCMAKE_INSTALL_PREFIX="$SYSROOT"
+#ninja -j$JOBS
+#ninja -j$JOBS install
+#cd ..
+
+# Building libc++
+#mkdir -p libc++-build
+#cd llvm
+#cmake -G Ninja -S runtimes -B ../libc++-build \
+#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+#	-DLIBCXX_USE_COMPILER_RT=OFF \
+#	-DCMAKE_C_COMPILER="$SYSROOT/bin/clang" \
+#	-DCMAKE_CXX_COMPILER="$SYSROOT/bin/clang++" \
+#	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
+#	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
+#	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
+#	-DCMAKE_CXX_FLAGS="-nostdlib++" \
+#	-DCMAKE_INSTALL_PREFIX=$SYSROOT
+#cd ../libc++-build
+#ninja cxx cxxabi unwind
+#ninja install-cxx install-cxxabi install-unwind
+#cd ..
+
 # Building compiler-rt
-cd llvm/compiler-rt
-mkdir -p build
-cd build
-cmake .. \
+mkdir -p compiler-rt-build
+cd compiler-rt-build
+cmake ../llvm/compiler-rt \
 	-G Ninja \
+	-DCMAKE_C_COMPILER="$SYSROOT/bin/clang" \
+	-DCMAKE_CXX_COMPILER="$SYSROOT/bin/clang++" \
+	-DLLVM_CONFIG_PATH="$SYSROOT/bin/llvm-config" \
 	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
 	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
-	-DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -v --rtlib=compiler-rt" \
+	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_ASM_FLAGS="-fuse-ld=lld -ffreestanding" \
+	-DCMAKE_C_FLAGS="-fuse-ld=lld -ffreestanding -v" \
+	-DCMAKE_CXX_FLAGS="-fuse-ld=lld -ffreestanding -stdlib=libc++ -v" \
+	-DCMAKE_EXE_LINKER_FLAGS="-v" \
+	-DCOMPILER_RT_USE_LIBCXX=OFF \
+	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 	-DCOMPILER_RT_BUILD_BUILTINS=ON \
 	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
 	-DCOMPILER_RT_BUILD_MEMPROF=OFF \
 	-DCOMPILER_RT_BUILD_PROFILE=OFF \
 	-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
 	-DCOMPILER_RT_BUILD_XRAY=OFF \
+	-DCOMPILER_RT_BUILD_ORC=ON \
 	-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
-	-DCMAKE_SYSROOT="$SYSROOT"
-ninja
+	-DCOMPILER_RT_BUILTINS_ENABLE_PIC=OFF \
+	-DCMAKE_INSTALL_PREFIX=$SYSROOT
+ninja -j$JOBS
+ninja -j$JOBS install
 cd ..
-
-# Building clang
-#cd llvm
-#mkdir -p build
-#cmake -G Ninja -S llvm -B build \
-#	-DLLVM_ENABLE_PROJECTS="clang" \
-#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-#	-DLLVM_ENABLE_LLD=true \
-#	-DLLVM_RUNTIME_TARGETS="$TARGET" \
-#	-DCMAKE_INSTALL_PREFIX="$SYSROOT"
-#ninja -C build runtimes
-#ninja -C build check-runtimes
-#ninja -C build install-runtimes
-#cd ..
