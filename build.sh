@@ -46,66 +46,47 @@ export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 
 # Building Musl
-#cd musl
-#./configure \
-#	--target="$TARGET" \
-#	--prefix="/usr"
-#make -j${JOBS}
-#make DESTDIR=$SYSROOT install
-#cd ..
+cd musl
+./configure \
+	--target="$TARGET" \
+	--prefix="/usr"
+make -j${JOBS}
+make DESTDIR=$SYSROOT install
+cd ..
 
 unset CFLAGS
 unset CXXFLAGS
 
-# Building libc++
-#cd llvm
-#rm -rf build
-#mkdir -p build
-#cmake \
-#	-G Ninja \
-#	-S runtimes \
-#	-B build \
-#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-#	-DCMAKE_INSTALL_PREFIX="$SYSROOT" \
-#	-DCMAKE_C_COMPILER="/bin/clang" \
-#	-DCMAKE_CXX_COMPILER="/bin/clang++" \
-#	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
-#	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
-#	#-DCMAKE_SYSROOT="$SYSROOT"
-#ninja -C build cxx cxxabi unwind
-#ninja -C build install-cxx install-cxxabi install-unwind
-#cd ..
-
 # Building clang and lld
-#mkdir -p clang-build
-#cd clang-build
-#cmake ../llvm/llvm -G Ninja -DLLVM_ENABLE_PROJECTS="lld;clang" \
-#	-DCMAKE_BUILD_TYPE=Release \
-#	-DLLVM_PARALLEL_COMPILE_JOBS=$JOBS \
-#	-DLLVM_PARALLEL_LINK_JOBS=1 \
-#	-DLLVM_TARGETS_TO_BUILD=X86 \
-#	-DCMAKE_INSTALL_PREFIX="$SYSROOT"
-#ninja -j$JOBS
-#ninja -j$JOBS install
-#cd ..
+mkdir -p clang-build
+cd clang-build
+cmake ../llvm/llvm -G Ninja -DLLVM_ENABLE_PROJECTS="lld;clang" \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DLLVM_PARALLEL_COMPILE_JOBS=$JOBS \
+	-DLLVM_PARALLEL_LINK_JOBS=1 \
+	-DLLVM_TARGETS_TO_BUILD=X86 \
+	-DCMAKE_INSTALL_PREFIX="$SYSROOT"
+ninja -j$JOBS
+ninja -j$JOBS install
+cd ..
 
 # Building libc++
-#mkdir -p libc++-build
-#cd llvm
-#cmake -G Ninja -S runtimes -B ../libc++-build \
-#	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-#	-DLIBCXX_USE_COMPILER_RT=OFF \
-#	-DCMAKE_C_COMPILER="$SYSROOT/bin/clang" \
-#	-DCMAKE_CXX_COMPILER="$SYSROOT/bin/clang++" \
-#	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
-#	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
-#	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
-#	-DCMAKE_CXX_FLAGS="-nostdlib++" \
-#	-DCMAKE_INSTALL_PREFIX=$SYSROOT
-#cd ../libc++-build
-#ninja cxx cxxabi unwind
-#ninja install-cxx install-cxxabi install-unwind
-#cd ..
+mkdir -p libc++-build
+cd llvm
+cmake -G Ninja -S runtimes -B ../libc++-build \
+	-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+	-DLIBCXX_USE_COMPILER_RT=OFF \
+	-DCMAKE_C_COMPILER="$SYSROOT/bin/clang" \
+	-DCMAKE_CXX_COMPILER="$SYSROOT/bin/clang++" \
+	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
+	-DCMAKE_CXX_FLAGS="-nostdlib++" \
+	-DCMAKE_INSTALL_PREFIX=$SYSROOT
+cd ../libc++-build
+ninja -j$JOBS cxx cxxabi unwind
+ninja install-cxx install-cxxabi install-unwind
+cd ..
 
 # Building compiler-rt
 mkdir -p compiler-rt-build
@@ -121,7 +102,6 @@ cmake ../llvm/compiler-rt \
 	-DCMAKE_ASM_FLAGS="-fuse-ld=lld" \
 	-DCMAKE_C_FLAGS="-fuse-ld=lld" \
 	-DCMAKE_CXX_FLAGS="-fuse-ld=lld -stdlib=libc++" \
-	-DCMAKE_EXE_LINKER_FLAGS="-v" \
 	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 	-DCOMPILER_RT_BUILD_BUILTINS=ON \
 	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
