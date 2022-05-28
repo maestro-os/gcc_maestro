@@ -30,17 +30,17 @@ export CC=clang
 export CXX=clang++
 
 # Building binutils
-#mkdir -p binutils-build
-#cd binutils-build
-#../binutils/configure \
-#	--prefix="$SYSROOT/tools" \
-#	--with-sysroot="$SYSROOT" \
-#	--target="$TARGET" \
-#	--disable-nls \
-#	--disable-werror
-#make -j${JOBS}
-#make install -j1
-#cd ..
+mkdir -p binutils-build
+cd binutils-build
+../binutils/configure \
+	--prefix="$SYSROOT/tools" \
+	--with-sysroot="$SYSROOT" \
+	--target="$TARGET" \
+	--disable-nls \
+	--disable-werror
+make -j${JOBS}
+make install -j1
+cd ..
 
 export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
@@ -116,3 +116,6 @@ cmake ../llvm/compiler-rt \
 ninja -j$JOBS
 ninja -j$JOBS install
 cd ..
+
+ln -sv ../../lib/linux/clang_rt.crtbegin-i386.o toolchain/usr/lib/crtbegin.o
+ln -sv ../../lib/linux/clang_rt.crtend-i386.o toolchain/usr/lib/crtend.o
