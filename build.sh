@@ -23,13 +23,14 @@ umask 022
 
 
 # ------------------------------
-#    Stage 1
+#    Building binutils
 # ------------------------------
+
+
 
 export CC=clang
 export CXX=clang++
 
-# Building binutils
 mkdir -p binutils-build
 cd binutils-build
 ../binutils/configure \
@@ -42,10 +43,17 @@ make -j${JOBS}
 make install -j1
 cd ..
 
+
+
+# ------------------------------
+#    Building musl
+# ------------------------------
+
+
+
 export CFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 export CXXFLAGS="--target=${TARGET} -fuse-ld=lld --rtlib=compiler-rt"
 
-# Building Musl
 cd musl
 ./configure \
 	--target="$TARGET" \
@@ -57,7 +65,14 @@ cd ..
 unset CFLAGS
 unset CXXFLAGS
 
-# Building clang and lld
+
+
+# ------------------------------
+#    Building clang + lld
+# ------------------------------
+
+
+
 mkdir -p clang-build
 cd clang-build
 cmake ../llvm/llvm -G Ninja -DLLVM_ENABLE_PROJECTS="lld;clang" \
