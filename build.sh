@@ -4,8 +4,8 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-#export TARGET=i386-unknown-maestro
 export TARGET=i686-unknown-linux-musl
+
 export SYSROOT="$(pwd)/toolchain"
 
 # The numbers of jobs to run simultaneously
