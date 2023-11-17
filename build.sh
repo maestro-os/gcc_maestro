@@ -4,7 +4,7 @@
 set -e
 
 export HOST=$(gcc -dumpmachine)
-export TARGET=i686-unknown-linux-musl
+export TARGET=i386-unknown-linux-musl
 
 export SYSROOT="$(pwd)/toolchain"
 
@@ -20,6 +20,9 @@ export LC_ALL=POSIX
 set +h
 umask 022
 
+export CC=clang
+export CXX=clang++
+
 
 
 # ------------------------------
@@ -27,9 +30,6 @@ umask 022
 # ------------------------------
 
 
-
-export CC=clang
-export CXX=clang++
 
 mkdir -p binutils-build
 cd binutils-build
@@ -114,9 +114,7 @@ cmake ../llvm/compiler-rt \
 	-DCMAKE_ASM_COMPILER_TARGET="$TARGET" \
 	-DCMAKE_C_COMPILER_TARGET="$TARGET" \
 	-DCMAKE_CXX_COMPILER_TARGET="$TARGET" \
-	-DCMAKE_ASM_FLAGS="-fuse-ld=lld" \
-	-DCMAKE_C_FLAGS="-fuse-ld=lld" \
-	-DCMAKE_CXX_FLAGS="-fuse-ld=lld -stdlib=libc++" \
+	-DCMAKE_CXX_FLAGS="-stdlib=libc++" \
 	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 	-DCOMPILER_RT_BUILD_BUILTINS=ON \
 	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
@@ -127,10 +125,12 @@ cmake ../llvm/compiler-rt \
 	-DCOMPILER_RT_BUILD_ORC=ON \
 	-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
 	-DCOMPILER_RT_BUILTINS_ENABLE_PIC=OFF \
-	-DCMAKE_INSTALL_PREFIX=$SYSROOT
+	-DCMAKE_INSTALL_PREFIX=$SYSROOT/lib/clang/13.0.1/
 ninja -j$JOBS
 ninja -j$JOBS install
 cd ..
 
-ln -sv ../../lib/linux/clang_rt.crtbegin-i386.o toolchain/usr/lib/crtbegin.o
-ln -sv ../../lib/linux/clang_rt.crtend-i386.o toolchain/usr/lib/crtend.o
+ln -fsv ../../lib/clang/13.0.1/lib/linux/clang_rt.crtbegin-i386.o $SYSROOT/usr/lib/crtbegin.o
+ln -fsv crtbegin.o $SYSROOT/usr/lib/crtbeginS.o
+ln -fsv crtbegin.o $SYSROOT/usr/lib/crtbeginT.o
+ln -fsv ../../lib/clang/13.0.1/lib/linux/clang_rt.crtend-i386.o $SYSROOT/usr/lib/crtend.o
